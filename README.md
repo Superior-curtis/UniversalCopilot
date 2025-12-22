@@ -2,95 +2,322 @@
 
 A Windows AI agent powered by Ollama that provides real-time ghost text suggestions and intelligent assistance as you type—anywhere on your screen.
 
-## Features
+## What It Does
 
-- **Always-On AI Assistant**: Continuously monitors and provides suggestions as you type in any Windows application
-- **Ghost Text Overlay**: Non-intrusive overlay shows AI predictions near your cursor
-- **Keyboard Shortcuts**:
-  - `Ctrl+Shift+C` — Toggle chat window for deeper AI conversations with screen context
-  - `Ctrl+Shift+S` — Show a concise summary overlay of current window content
-  - `TAB` — Accept overlay suggestion and insert it
-  - `ESC` — Dismiss overlay suggestion
-- **Context-Aware**: Understands what you're typing and the current window context
-- **Local LLM**: Runs entirely on Ollama (mistral model by default); no cloud dependency
-- **Multiple Deployment Options**: Installer, portable ZIP, or direct build
+UniversalCopilot is like having a personal AI assistant that watches what you're writing and offers helpful suggestions. It appears as non-intrusive "ghost text" (faint suggestions) next to your cursor, similar to GitHub Copilot or IDE autocomplete—but it works **everywhere on Windows**: emails, chat, documents, code editors, social media, etc.
 
-## Requirements
+### Key Capabilities
 
-- **Windows 10/11** (x64)
+- **Always-On Assistance** — Monitors your typing in real-time across any Windows application
+- **Ghost Text Overlay** — Shows AI predictions as semi-transparent text near your cursor
+- **Smart Context Awareness** — Understands the active window and what you're writing
+- **Chat with Context** — Open a chat window to ask questions with full screen context visible to the AI
+- **Zero Cloud Dependency** — Runs entirely local using Ollama; your data never leaves your computer
+- **Non-Intrusive** — Works silently in the background; dismiss suggestions with ESC or just keep typing
+
+## How It Works (Under the Hood)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ You type in any Windows app (Gmail, Discord, VS Code, etc.) │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+                     ↓
+            ┌────────────────┐
+            │ Keyboard Hook  │ ← Listens globally for typing
+            └────────┬───────┘
+                     │
+                     ↓
+          ┌──────────────────────┐
+          │ Wait 400ms (debounce)│ ← User still typing?
+          └────────┬─────────────┘   If yes → wait more
+                   │ No more typing
+                   ↓
+        ┌────────────────────────┐
+        │ Capture Window Context │ ← Read text before cursor
+        └────────┬───────────────┘
+                 │
+                 ↓
+      ┌──────────────────────────┐
+      │ Send to Ollama LLM       │ ← "Continue this text..."
+      │ (mistral model)          │
+      └────────┬─────────────────┘
+               │
+               ↓
+      ┌──────────────────────────┐
+      │ Get AI Suggestion        │ ← 2-3 sentences continuation
+      │ (2-3 seconds typically)  │
+      └────────┬─────────────────┘
+               │
+               ↓
+      ┌──────────────────────────┐
+      │ Display Ghost Text       │ ← Semi-transparent overlay
+      │ Near Cursor              │
+      └────────┬─────────────────┘
+               │
+     ┌─────────┴──────────┐
+     ↓                    ↓
+  [TAB]               [ESC] or
+  Insert              Dismiss
+  Text                (or ignore)
+```
+
+## Installation
+
+### Prerequisites
+
+- **Windows 10/11** (x64 only)
 - **Ollama** — Download from [ollama.com](https://ollama.com)
-- **Rust** (only if building from source)
+  - After installing, run `ollama pull mistral` to download the AI model (~4GB)
+- **Administrator privileges** (for installer only; app doesn't need it after install)
 
-## Quick Start
+### Option 1: Installer (Easiest)
 
-### Option 1: Installer (Recommended)
+1. **Download** [install.exe](../../releases) from Releases
+2. **Run** the installer (admin required)
+3. **Follow prompts** — it will install Ollama if missing and set up the app
+4. **Start menu** → UniversalCopilot
 
-```powershell
-# Download or build install.exe from installer/dist/
-# Run install.exe and follow prompts
-# Ollama will be installed silently if bundled
-```
+### Option 2: Portable ZIP (No Installation)
 
-### Option 2: Portable ZIP
-
-```powershell
-# Download or build UniversalCopilot-portable.zip from installer/portable/dist/
-# Extract and run:
-./first_run.ps1
-# This will install Ollama (if bundled), prepare the model, and start the app
-```
+1. **Download** [UniversalCopilot-portable.zip](../../releases) from Releases
+2. **Extract** to a folder
+3. **Run** `first_run.ps1` (right-click → Run with PowerShell)
+4. **Done** — app starts automatically after setup
 
 ### Option 3: Build from Source
 
 ```powershell
-# Clone repo
-git clone https://github.com/yourusername/UniversalCopilot.git
+# Clone the repo
+git clone https://github.com/Superior-curtis/UniversalCopilot.git
 cd UniversalCopilot
 
-# Ensure Ollama is running
-ollama serve &
+# Ensure Rust is installed (https://rustup.rs/)
+# Install Ollama and pull mistral model
+ollama pull mistral
 
-# Build and run
+# Build release binary
 cargo build --release
+
+# Run
 ./target/release/universal_copilot.exe
 ```
 
-## How It Works
+## Usage
 
-1. **Continuous Monitoring** — The app listens to all keyboard input globally
-2. **Context Capture** — Every ~1.2 seconds (or on typing pause), it captures the active window text
-3. **AI Generation** — Sends context to Ollama and generates 2–3 sentence continuations
-4. **Ghost Text Display** — Shows suggestion in an overlay near your cursor
-5. **User Control** — Press TAB to accept, ESC to dismiss, or keep typing to ignore
+### Basic Usage
+
+1. **Open any text editor** (Notepad, VS Code, Gmail, Discord, etc.)
+2. **Start typing** — the AI watches what you write
+3. **Wait ~400ms after typing stops** — a ghost text suggestion appears
+4. **Press TAB** to insert the suggestion, or **ESC** to dismiss
+5. **Or just keep typing** — the suggestion vanishes automatically
+
+### Keyboard Shortcuts
+
+| Hotkey | Action |
+|--------|--------|
+| `Tab` | Accept and insert the overlay suggestion |
+| `Esc` | Dismiss the suggestion |
+| `Ctrl+Shift+C` | Toggle chat window (ask AI questions with screen context) |
+| `Ctrl+Shift+S` | Show a summary overlay of the current window content |
+| `##` | (Optional) Trigger inline suggestion for the current context |
+
+### Chat Window
+
+Press `Ctrl+Shift+C` to open the chat window. It shows:
+- **"What I Can See"** — Current window title and captured text
+- **Chat history** — Your questions and AI responses
+- Type a message and press Enter to chat
+
+The AI can see exactly what's on your screen, making responses highly relevant.
 
 ## Configuration
 
 ### Change the AI Model
 
-Edit `src/llm.rs` and change `MODEL`:
+Ollama supports many models. To use a different one:
+
+1. **Pull the model** (e.g., `ollama pull llama2`)
+2. **Edit** `src/llm.rs`:
+   ```rust
+   const MODEL: &str = "llama2";  // Change from "mistral"
+   ```
+3. **Rebuild**: `cargo build --release`
+
+**Popular models:**
+- `mistral` — Fast, good quality (default)
+- `llama2` — Strong reasoning, slower
+- `neural-chat` — Optimized for conversation
+- `dolphin-mixtral` — Very capable, slower
+
+### Adjust Timing
+
+Edit `src/main.rs` to change when suggestions appear:
 
 ```rust
-const MODEL: &str = "mistral:latest";  // Change to "llama2", "neural-chat", etc.
+// Debounce: how long to wait after you stop typing
+tokio::select! {
+    _ = sleep(Duration::from_millis(400)) => {}  // Change 400ms here
+    ...
+}
+
+// Periodic: how often to refresh if you're not typing
+_ = sleep(Duration::from_millis(1200)) => {}  // Change 1200ms here
 ```
 
-### Adjust Response Timing
+- **Shorter debounce** (e.g., 200ms) = faster response, but interrupts typing
+- **Longer debounce** (e.g., 800ms) = less intrusive, slower to suggest
+- **Shorter periodic** = refreshes more often, more CPU usage
 
-Edit `src/main.rs` inference loop:
-- **Debounce**: 400ms (how long after typing stops before generating)
-- **Periodic refresh**: 1.2 seconds (how often to check if idle)
+## Architecture
 
-## Deployment
+```
+src/
+├── main.rs          — Main event loop, coordination
+├── keyboard.rs      — Global keyboard hook, hotkey handlers
+├── overlay.rs       — Ghost text rendering (layered window)
+├── context.rs       — Active window text capture
+├── llm.rs           — Ollama HTTP API client
+├── chatbot.rs       — Chat UI window
+├── infer.rs         — Streaming inference pipeline
+├── caret.rs         — Caret position tracking
+└── logger.rs        — Debug logging
 
-### Building the Installer
+installer/
+├── UniversalCopilot.iss      — Inno Setup installer script
+├── build.ps1                 — Build installer.exe
+└── portable/
+    ├── build-zip.ps1         — Create portable ZIP
+    └── first_run.ps1         — Setup script for portable version
+```
+
+### Key Technologies
+
+- **Rust** — Safe, fast system-level code
+- **Windows API** — Low-level keyboard hook (WH_KEYBOARD_LL), window text capture, layered window rendering
+- **Ollama** — Local LLM inference via HTTP API
+- **Tokio** — Async runtime for concurrent tasks
+- **Serde** — JSON parsing for Ollama responses
+
+## Troubleshooting
+
+### Ghost text not showing
+
+**Check 1: Is Ollama running?**
+```powershell
+ollama serve
+```
+You should see "Listening on 127.0.0.1:11434"
+
+**Check 2: Is mistral model downloaded?**
+```powershell
+ollama pull mistral
+ollama list  # should show mistral:latest
+```
+
+**Check 3: Is the active window a text field?**
+- Works with: Notepad, Word, Gmail, Discord, VS Code, most text inputs
+- May not work with: PDF readers, image editors, some custom controls
+
+**Check 4: Look for errors in console**
+- Run app from terminal to see debug logs
+- Look for "llm: generating suggestion" or error messages
+
+### "Ollama not found at localhost:11434"
+
+1. Download Ollama from https://ollama.com/download
+2. Install and run `ollama serve` in a separate terminal
+3. Restart UniversalCopilot
+
+### Suggestions are very slow (5+ seconds)
+
+**Reason**: Mistral model is slow on your hardware  
+**Solution**: Use a faster model
+```powershell
+ollama pull neural-chat  # Smaller, faster
+# Then change MODEL in src/llm.rs and rebuild
+```
+
+### "access denied" when installing
+
+- Run the installer as **Administrator** (right-click → Run as administrator)
+- Close any running instance of UniversalCopilot first
+
+### App crashes on startup
+
+Check logs for missing dependencies. Run from terminal to see full error:
+```powershell
+cd "C:\Program Files\UniversalCopilot"
+./universal_copilot.exe
+```
+
+## Performance & Privacy
+
+### Performance
+- **Memory**: ~200MB base + LLM model size (~4-7GB for mistral)
+- **CPU**: Minimal when idle, high during inference (normal for LLM)
+- **Disk**: ~4GB for Ollama model cache
+- **Network**: None (fully local, no telemetry)
+
+### Privacy
+- **All data stays local** — Nothing is sent to cloud servers
+- **No logging of keystrokes** — The app only detects hotkeys and reads window context
+- **No telemetry** — Zero data collection
+- Your content is only sent to your local Ollama instance
+
+## Uninstall
+
+### Using Windows Control Panel
+
+1. **Settings** → **Apps** → **Apps & Features**
+2. Find **UniversalCopilot**
+3. Click → **Uninstall**
+4. (Optional) Uninstall Ollama the same way
+
+### Manual Uninstall (Portable)
+
+Just delete the extracted folder.
+
+## Future Roadmap
+
+- [ ] GUI settings window for configuration
+- [ ] More LLM backends (LM Studio, vLLM, Text Generation WebUI)
+- [ ] Custom prompt templates for different use cases
+- [ ] Code-specific suggestions mode
+- [ ] Multi-language support
+- [ ] Keyboard shortcut customization
+- [ ] Model auto-download and management UI
+
+## Limitations
+
+- **Windows only** (no Mac/Linux support currently)
+- **Text-field only** — Won't work in all custom UI controls
+- **Single GPU** — Uses whatever GPU Ollama can access
+- **English focus** — Default prompts in English (configurable)
+
+## Contributing
+
+We welcome contributions! Ways to help:
+
+1. **Bug reports** — Open an issue on GitHub
+2. **Feature requests** — Describe what you'd like to see
+3. **Code improvements** — Fork, improve, submit a PR
+4. **Documentation** — Help improve this README or add examples
+
+## Building & Deployment
+
+### Build Installer
+
+Requires [Inno Setup 6](https://jrsoftware.org/isinfo.php) to be installed:
 
 ```powershell
-# Requires Inno Setup 6 (https://jrsoftware.org/isinfo.php)
 cd installer
 ./build.ps1
 # Output: installer/dist/install.exe
 ```
 
-### Building the Portable ZIP
+### Build Portable ZIP
 
 ```powershell
 cd installer/portable
@@ -98,57 +325,32 @@ cd installer/portable
 # Output: installer/portable/dist/UniversalCopilot-portable.zip
 ```
 
-## Architecture
+### Cross-Compile from Linux/Mac (Future)
 
-- **`src/main.rs`** — Main event loop, inference orchestration
-- **`src/keyboard.rs`** — Low-level keyboard hook (WH_KEYBOARD_LL), hotkey handlers
-- **`src/overlay.rs`** — Layered window rendering, ghost text display
-- **`src/context.rs`** — Active window text capture via WinAPI
-- **`src/llm.rs`** — Ollama HTTP client (sync and async)
-- **`src/chatbot.rs`** — Chat UI window with screen/text context preview
-- **`src/infer.rs`** — Streaming LLM inference pipeline
-
-## Keyboard Hook Safety
-
-The app uses `WH_KEYBOARD_LL` (low-level keyboard hook) which is Windows-standard for global hotkey capture. It does NOT log keystrokes; it only detects hotkey patterns and passes all other input through immediately.
-
-## Troubleshooting
-
-### Ghost text not appearing
-- Ensure Ollama is running: `ollama serve`
-- Check that the active window is a text field (not all controls expose text)
-- Verify model is pulled: `ollama pull mistral`
-- Check logs for errors
-
-### "Ollama not found" error
-- Install Ollama from https://ollama.com/download
-- Run `ollama serve` in a terminal
-- Restart UniversalCopilot
-
-### Installer fails with "access denied"
-- Run as Administrator
-- Ensure no other copy of the app is running
-
-## Future Enhancements
-
-- [ ] Support for more LLM backends (LM Studio, vLLM, etc.)
-- [ ] Custom prompt templates
-- [ ] Multi-language support
-- [ ] Code completion mode
-- [ ] Keyboard shortcut customization UI
-- [ ] Settings window
+Not currently supported, but contributions welcome!
 
 ## License
 
-MIT
+MIT License — See [LICENSE](LICENSE) file for details.
 
-## Contributing
+## Acknowledgments
 
-Contributions welcome! Please open an issue or submit a PR.
+- [Ollama](https://ollama.ai) — Fantastic local LLM platform
+- [Mistral AI](https://mistral.ai) — Great open-source models
+- [Tokio](https://tokio.rs) — Excellent async Rust runtime
+- Windows API documentation and community examples
+
+## Support & Contact
+
+- **GitHub Issues** — Report bugs or request features: https://github.com/Superior-curtis/UniversalCopilot/issues
+- **Discussions** — Ask questions: https://github.com/Superior-curtis/UniversalCopilot/discussions
 
 ---
 
-**Developed with ❤️ using Rust and Windows API**
+**Made with ❤️ using Rust and Windows API**
+
+**Questions? Open an issue on GitHub!**
+
   - Single suggestion at a time
   - Inline ghost text only
   - Feels like an extension of user's thoughts
