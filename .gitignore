@@ -1,0 +1,37 @@
+# Rust build artifacts
+/target/
+Cargo.lock
+*.rlib
+*.rmeta
+*.so
+*.dylib
+*.dll
+*.exe
+*.pdb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Installer output
+/installer/dist/
+/installer/portable/dist/
+/installer/portable/staging/
+
+# Logs
+debug.log
+*.log
+
+# Ollama (local models)
+/.ollama/
+
+# Temporary files
+tmp/
+temp/

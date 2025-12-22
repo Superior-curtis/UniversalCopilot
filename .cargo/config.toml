@@ -1,0 +1,12 @@
+[build]
+# Explicitly tell cargo to use the system linker
+# This can help bypass Build Tools detection issues
+rustflags = ["-C", "target-cpu=native"]
+
+[target.x86_64-pc-windows-msvc]
+# Try to auto-find linker; if it fails, specify explicit path
+# linker = "link.exe"
+
+[target.x86_64-pc-windows-gnu]
+# Use MSYS2 UCRT64 GCC if available
+linker = "C:/msys64/ucrt64/bin/gcc.exe"

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Minimal WiX example. Developer-facing. Edit Product/Manufacturer/UpgradeCode values. -->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="Universal Copilot" Language="1033" Version="0.1.0" Manufacturer="UniversalCopilot" UpgradeCode="PUT-GUID-HERE">
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine"/>
+
+    <MediaTemplate/>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="Universal Copilot"/>
+      </Directory>
+    </Directory>
+
+    <Feature Id="DefaultFeature" Level="1">
+      <ComponentGroupRef Id="AppFiles"/>
+    </Feature>
+
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <!-- Use heat.exe or list files here. Example single file: -->
+      <Component Id="cmp_universal_copilot_exe" Guid="*">
+        <File Source="..\target\release\universal_copilot.exe" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <Property Id="ARPCONTACT" Value="UniversalCopilot" />
+    <Property Id="ARPURLINFOABOUT" Value="https://example.com" />
+
+  </Product>
+</Wix>
